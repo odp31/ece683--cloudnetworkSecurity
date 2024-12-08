@@ -1,27 +1,26 @@
-import RPi.GPIO as GPIO
+import machine
 import time
 
-# define GPIO pin
-led_pin = 23
-
-#set up GPIO pin
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(led_pin, GPIO.OUT)
+# Define GPIO pin for the LED
+led_pin = machine.Pin(27, machine.Pin.OUT)
 
 def blink_led(frequency):
-  period = 1
-  while True:
-    GPIO.output(led_pin, GPIO.HIGH)
-    time.sleep(period / 2)
-    GPIO.output(led_pin, GPIO.LOW)
-    time.sleep(period / 2)
+    """Blinks the LED at the specified frequency.
+
+    Args:
+        frequency: The blinking frequency in Hz.
+    """
+    period = 1 / frequency
+    while True:
+        led_pin.value(1)
+        time.sleep(period / 2)
+        led_pin.value(0)
+        time.sleep(period / 2)
 
 if __name__ == "__main__":
-  try:
     while True:
-      frequency = float(input("enter blinking frequency (Hz): "))
-      blink_led(frequency)
-  except KeyboardInterrupt:
-    GPIO.cleanup()
-    print("program terminated.")
-
+        try:
+            frequency = float(input("Enter blinking frequency (Hz): "))
+            blink_led(frequency)
+        except ValueError:
+            print("Invalid input. Please enter a valid number.")
