@@ -1,26 +1,27 @@
-import RPi.GPIO as GPIO
+import machine
 import time
 
-# define GPIO pins
-button_pin = 18
-led_pin = 21
+# Define GPIO pins
+button_pin = machine.Pin(17, machine.Pin.IN, machine.Pin.PULL_UP)
+led_pin = machine.Pin(27, machine.Pin.OUT)
 
-# set up GPIO pins
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(led_pin, GPIO.OUT)
+# Debounce time
+debounce_time = 0.2
 
-# debouncing function
-def debounce(pin):
-  while GPIO.input(pin):
-    time.sleep(0.02)
+# Initial LED state
+led_state = False
 
-# main loop
-try:
-  while True:
-    debounce(button_pin)
-    GPIO.output(led_pin, not GPIO.input(led_pin))
-    print("LED state:", GPIO.input(led_pin))
+def button_callback(pin):
+    global led_state
+    # Debounce the button press
+    time.sleep(debounce_time)
+    if pin.value() == 0:
+        led_state = not led_state
+        led_pin.value(led_state)
 
-except KeyboardInterrupt:
-  GPIO.cleanup()
+# Set up the button interrupt
+button_pin.irq(trigger=machine.Pin.IRQ_FALLING, handler=button_callback)
+
+while True:
+    #  can add other functionalities here, such as logging or printing the LED state
+    pass
